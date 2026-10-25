@@ -1,0 +1,30 @@
+{% extends "base_email.html" %}
+
+{% block subject %}Verify Your Email Address{% endblock %}
+{% block header_title %}Verify Your Email{% endblock %}
+{% block header_subtitle %}One step away from activation{% endblock %}
+
+{% block content %}
+<h2>Welcome {{ user.first_name|default:"there" }}!</h2>
+
+<p>Thank you for signing up with <strong>Starter API</strong>. To complete your registration and activate your account, please verify your email address by clicking the button below:</p>
+
+<center>
+    <a href="{{ verification_url }}" class="btn-primary">Verify Email Address</a>
+</center>
+
+<p style="text-align: center; color: #6b7280; font-size: 14px; margin-top: 10px;">
+    This link will expire in {{ expires_in|default:"24 hours" }}.
+</p>
+
+<div class="info-box">
+    <p><strong>Why verify?</strong> Email verification helps us ensure the security of your account and allows us to send you important notifications about your account activity.</p>
+</div>
+
+<p>If the button doesn't work, copy and paste this link into your browser:</p>
+<p style="word-break: break-all; color: #667eea; font-size: 14px;">{{ verification_url }}</p>
+
+<p>If you didn't create an account with us, you can safely ignore this email.</p>
+
+<p>Best regards,<br>The Starter API Team</p>
+{% endblock %}

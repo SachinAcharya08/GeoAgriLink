@@ -1,0 +1,29 @@
+{% extends "base_email.html" %}
+
+{% block subject %}Welcome to Starter API!{% endblock %}
+{% block header_title %}Welcome Aboard!{% endblock %}
+{% block header_subtitle %}Your account is ready{% endblock %}
+
+{% block content %}
+<h2>Hello {{ user.first_name|default:user.email }}!</h2>
+
+<p>Thank you for joining <strong>Starter API</strong>. We're excited to have you on board!</p>
+
+<p>Your account has been successfully created and is ready to use. Here are your account details:</p>
+
+<div class="info-box">
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Name:</strong> {{ user.get_full_name|default:"Not set" }}</p>
+    <p><strong>Joined:</strong> {{ user.created_at|date:"F j, Y" }}</p>
+</div>
+
+<p>To get started, explore our API documentation and start building amazing applications:</p>
+
+<center>
+    <a href="{{ docs_url }}" class="btn-primary">View API Documentation</a>
+</center>
+
+<p>If you have any questions, our support team is always here to help. Simply reply to this email or visit our support center.</p>
+
+<p>Best regards,<br>The Starter API Team</p>
+{% endblock %}
