@@ -22,6 +22,7 @@ urlpatterns = [
         name="redoc",
     ),
     path("api/v1/users/", include("apps.users.urls")),
+    path("api/", include("apps.farms.urls")),
 ]
 
 if settings.DEBUG:
