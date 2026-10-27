@@ -34,7 +34,8 @@ class User(AbstractUser, BaseModel):
     ROLE_CHOICES = [
         ("user", _("User")),
         ("admin", _("Administrator")),
-        ("organizer", _("Organizer")),
+        ("farmer", _("farmer")),
+        ("buyer", _("buyer")),
     ]
 
     email = models.EmailField(
@@ -87,57 +88,3 @@ class User(AbstractUser, BaseModel):
 
     def get_short_name(self):
         return self.first_name
-
-
-class Notification(BaseModel):
-    TYPE_CHOICES = [
-        ("info", _("Info")),
-        ("success", _("Success")),
-        ("warning", _("Warning")),
-        ("error", _("Error")),
-    ]
-
-    recipient = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="notifications", verbose_name=_("Recipient")
-    )
-    title = models.CharField(max_length=200, verbose_name=_("Title"))
-    message = models.TextField(verbose_name=_("Message"))
-    notification_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default="info", verbose_name=_("Type"))
-    is_read = models.BooleanField(default=False, verbose_name=_("Is Read"))
-    read_at = models.DateTimeField(blank=True, null=True, verbose_name=_("Read At"))
-    action_url = models.URLField(blank=True, null=True, verbose_name=_("Action URL"))
-    metadata = models.JSONField(default=dict, blank=True, verbose_name=_("Metadata"))
-
-    class Meta:
-        verbose_name = _("Notification")
-        verbose_name_plural = _("Notifications")
-        ordering = ["-created_at"]
-
-    def __str__(self):
-        return f"{self.recipient.email} - {self.title}"
-
-    def mark_as_read(self):
-        if not self.is_read:
-            from django.utils import timezone
-
-            self.is_read = True
-            self.read_at = timezone.now()
-            self.save(update_fields=["is_read", "read_at"])
-
-
-class NotificationPreference(BaseModel):
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name="notification_preferences", verbose_name=_("User")
-    )
-    email_notifications = models.BooleanField(default=True, verbose_name=_("Email Notifications"))
-    push_notifications = models.BooleanField(default=True, verbose_name=_("Push Notifications"))
-    in_app_notifications = models.BooleanField(default=True, verbose_name=_("In-App Notifications"))
-    notify_on_post_like = models.BooleanField(default=True, verbose_name=_("Notify on Post Like"))
-    notify_on_comment = models.BooleanField(default=True, verbose_name=_("Notify on Comment"))
-
-    class Meta:
-        verbose_name = _("Notification Preference")
-        verbose_name_plural = _("Notification Preferences")
-
-    def __str__(self):
-        return f"{self.user.email} - Preferences"

@@ -3,16 +3,12 @@ from rest_framework.routers import DefaultRouter
 
 from apps.users.views import (
     ChangePasswordView,
-    NotificationPreferenceViewSet,
-    NotificationViewSet,
     UserLoginView,
     UserProfileView,
     UserRegistrationView,
 )
 
 router = DefaultRouter()
-router.register(r"notifications", NotificationViewSet, basename="notification")
-router.register(r"preferences", NotificationPreferenceViewSet, basename="notification-preference")
 
 urlpatterns = [
     path("register/", UserRegistrationView.as_view(), name="user-register"),

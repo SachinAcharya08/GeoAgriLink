@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
-from apps.users.models import Notification, NotificationPreference, User
+from apps.users.models import User
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -125,40 +125,3 @@ class ChangePasswordSerializer(serializers.Serializer):
         if data["new_password"] != data.pop("new_password_confirm"):
             raise serializers.ValidationError({"new_password_confirm": _("Passwords do not match.")})
         return data
-
-
-class NotificationSerializer(serializers.ModelSerializer):
-    recipient_email = serializers.EmailField(source="recipient.email", read_only=True)
-
-    class Meta:
-        model = Notification
-        fields = [
-            "id",
-            "recipient_email",
-            "title",
-            "message",
-            "notification_type",
-            "is_read",
-            "read_at",
-            "action_url",
-            "metadata",
-            "created_at",
-        ]
-        read_only_fields = ["recipient", "created_at"]
-
-
-class NotificationPreferenceSerializer(serializers.ModelSerializer):
-    user_email = serializers.EmailField(source="user.email", read_only=True)
-
-    class Meta:
-        model = NotificationPreference
-        fields = [
-            "id",
-            "user_email",
-            "email_notifications",
-            "push_notifications",
-            "in_app_notifications",
-            "notify_on_post_like",
-            "notify_on_comment",
-        ]
-        read_only_fields = ["user"]

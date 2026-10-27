@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from apps.users.models import Notification, NotificationPreference, User
+from apps.users.models import User
 
 
 @admin.register(User)
@@ -60,22 +60,3 @@ class UserAdmin(BaseUserAdmin):
         return obj.get_full_name()
 
     get_full_name.short_description = "Full Name"
-
-
-@admin.register(Notification)
-class NotificationAdmin(admin.ModelAdmin):
-    list_display = ["id", "recipient", "title", "notification_type", "is_read", "created_at"]
-    list_filter = ["notification_type", "is_read", "created_at"]
-    search_fields = ["title", "message", "recipient__email"]
-    date_hierarchy = "created_at"
-    actions = ["mark_as_read"]
-
-    def mark_as_read(self, request, queryset):
-        queryset.update(is_read=True)
-
-
-@admin.register(NotificationPreference)
-class NotificationPreferenceAdmin(admin.ModelAdmin):
-    list_display = ["user", "email_notifications", "push_notifications", "in_app_notifications"]
-    list_filter = ["email_notifications", "push_notifications", "in_app_notifications"]
-    search_fields = ["user__email"]

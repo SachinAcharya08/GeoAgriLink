@@ -8,7 +8,7 @@ pymysql.install_as_MySQLdb()
 
 
 env = environ.Env(
-    DEBUG=(bool, False),
+    DEBUG=(bool,),
     ALLOWED_HOSTS=(str, "localhost,127.0.0.1"),
 )
 
@@ -46,8 +46,6 @@ INSTALLED_APPS = [
     # Internal apps
     "apps.core.apps.CoreConfig",
     "apps.users.apps.UsersConfig",
-    "apps.blogs.apps.BlogsConfig",
-    "apps.related_activity.apps.RelatedActivityConfig",
 ]
 
 MIDDLEWARE = [
@@ -63,7 +61,6 @@ MIDDLEWARE = [
     "apps.core.middleware.RequestLoggingMiddleware",
     "apps.core.middleware.SecurityHeadersMiddleware",
     "apps.core.middleware.ExceptionHandlerMiddleware",
-    "apps.related_activity.signals.ThreadLocalMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -91,14 +88,18 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database - MySQL with PyMySQL
 DATABASES = {
     "default": {
-        "ENGINE": env("DB_ENGINE", default="django.db.backends.postgresql"),
-        "NAME": env("DB_NAME", default="bic_hackathon_backend_django"),
+        "ENGINE": env("DB_ENGINE", default="django.db.backends.mysql"),
+        "NAME": env("DB_NAME", default="geoagrilink_db"),
         "USER": env("DB_USER", default="root"),
         "PASSWORD": env("DB_PASSWORD", default=""),
         "HOST": env("DB_HOST", default="localhost"),
-        "PORT": env("DB_PORT", default="5432"),
+        "PORT": env("DB_PORT", default="3306"),
         "ATOMIC_REQUESTS": True,
         "CONN_MAX_AGE": 600,
+        "OPTIONS": {
+            "charset": "utf8mb4",
+            "connect_timeout": 5,
+        },
     }
 }
 
@@ -249,19 +250,21 @@ SPECTACULAR_SETTINGS = {
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
 }
 
-SECURE_SSL_REDIRECT = not DEBUG
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
-SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
-SECURE_HSTS_PRELOAD = not DEBUG
-SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_SSL_HOST = True
+# SECURE_SSL_REDIRECT = not DEBUG
+# SESSION_COOKIE_SECURE = not DEBUG
+# CSRF_COOKIE_SECURE = not DEBUG
+# SECURE_BROWSER_XSS_FILTER = True
+# SECURE_CONTENT_TYPE_NOSNIFF = True
+# SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+# SECURE_HSTS_PRELOAD = not DEBUG
+# SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# SECURE_SSL_HOST = True
 
-CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS", default="").split(",")
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in env("CSRF_TRUSTED_ORIGINS", default="").split(",") if origin.strip()
+]
 
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"

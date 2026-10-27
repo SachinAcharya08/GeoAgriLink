@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import ValidationError
 
-from apps.users.models import Notification, NotificationPreference, User
+from apps.users.models import User
 
 
 class UserService:
@@ -53,63 +53,3 @@ class UserService:
     def verify_email(user):
         user.is_verified = True
         user.save()
-
-
-class NotificationService:
-
-    @staticmethod
-    def create_notification(recipient, title, message, notification_type="info", action_url=None, metadata=None):
-        return Notification.objects.create(
-            recipient=recipient,
-            title=title,
-            message=message,
-            notification_type=notification_type,
-            action_url=action_url,
-            metadata=metadata or {},
-        )
-
-    @staticmethod
-    def get_user_notifications(user, unread_only=False):
-        queryset = Notification.objects.filter(recipient=user)
-        if unread_only:
-            queryset = queryset.filter(is_read=False)
-        return queryset
-
-    @staticmethod
-    def get_unread_count(user):
-        return Notification.objects.filter(recipient=user, is_read=False).count()
-
-    @staticmethod
-    def mark_as_read(notification_id):
-        try:
-            notification = Notification.objects.get(id=notification_id)
-            notification.mark_as_read()
-            return True
-        except Notification.DoesNotExist:
-            return False
-
-    @staticmethod
-    def mark_all_as_read(user):
-        Notification.objects.filter(recipient=user, is_read=False).update(is_read=True)
-
-    @staticmethod
-    def get_or_create_preferences(user):
-        preference, created = NotificationPreference.objects.get_or_create(user=user)
-        return preference
-
-    @staticmethod
-    def should_send_notification(user, notification_type):
-        try:
-            prefs = NotificationPreference.objects.get(user=user)
-
-            if not prefs.in_app_notifications:
-                return False
-
-            type_mapping = {
-                "post_like": prefs.notify_on_post_like,
-                "comment": prefs.notify_on_comment,
-            }
-
-            return type_mapping.get(notification_type, True)
-        except NotificationPreference.DoesNotExist:
-            return True
