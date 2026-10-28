@@ -23,6 +23,8 @@ urlpatterns = [
     ),
     path("api/v1/users/", include("apps.users.urls")),
     path("api/", include("apps.farms.urls")),
+    path("api/", include("apps.crops.urls")),
+    path("api/", include("apps.ai_insights.urls")),
 ]
 
 if settings.DEBUG:

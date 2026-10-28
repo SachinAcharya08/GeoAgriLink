@@ -21,5 +21,5 @@ class ProductionHistorySerializers(serializers.ModelSerializer):
         harvested_date = attrs.get("harvested_date", getattr(self.instance, "harvested_date", None))
 
         if planted_date and harvested_date and harvested_date < planted_date:
-            raise serializers.ValidationError({"harvested_date": "harvest date should be after planted date"})
+            raise serializers.ValidationError({"harvested_date": ("harvest date should be after planted date")})
         return attrs
