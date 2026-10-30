@@ -20,9 +20,14 @@ class Farms(BaseModel):
 
 class FarmHistorys(BaseModel):
     farm = models.ForeignKey("farms.Farms", on_delete=models.CASCADE, related_name="history")
-    recorded_at = models.DateTimeField()
+    recorded_at = models.DateField()
+    ci_rededge = models.FloatField(null=True, blank=True)
+    evi = models.FloatField(null=True, blank=True)
+    lswi = models.FloatField(null=True, blank=True)
+    ndre = models.FloatField(null=True, blank=True)
     ndvi = models.FloatField(null=True, blank=True)
     ndwi = models.FloatField(null=True, blank=True)
+    lst = models.FloatField(null=True, blank=True)
     source = models.CharField(max_length=100, default="GEE")
 
     def __str__(self):
@@ -30,3 +35,4 @@ class FarmHistorys(BaseModel):
 
     class Meta:
         db_table = "FarmHistorys"
+        unique_together = ("farm", "recorded_at")
