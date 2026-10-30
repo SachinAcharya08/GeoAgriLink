@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "apps.farms.apps.FarmsConfig",
     "apps.crops.apps.CropsConfig",
     "apps.ai_insights.apps.AiInsightsConfig",
+    "apps.marketplaces.apps.MarketplacesConfig",
 ]
 
 MIDDLEWARE = [
