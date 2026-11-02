@@ -84,7 +84,7 @@ class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     total_amount = serializers.SerializerMethodField()
     customer_name = serializers.CharField(source="customer.get_full_name", read_only=True)
-    farm_name = serializers.CharField(source="farm.name", read_only=True)
+    seller_name = serializers.CharField(source="seller.get_full_name", read_only=True)
 
     class Meta:
         model = Order
@@ -92,8 +92,8 @@ class OrderSerializer(serializers.ModelSerializer):
             "id",
             "customer",
             "customer_name",
-            "farm",
-            "farm_name",
+            "seller",
+            "seller_name",
             "status",
             "delivery_address",
             "items",
@@ -104,8 +104,8 @@ class OrderSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_total_amount(self, obj):
-        if "total_amount" in obj.__dict__:
-            return obj.__dict__["total_amount"]
+        if "total_amount_calculated" in obj.__dict__:
+            return obj.__dict__["total_amount_calculated"]
 
         return obj.total_amount
 
@@ -114,9 +114,13 @@ class OrderItemCreateSerializer(serializers.Serializer):
     product_id = serializers.UUIDField()
     quantity = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=Decimal("0.01"))
 
+    def validate_product_id(self, value):
+        if not Product.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Product does not exist.")
+        return value
+
 
 class OrderCreateSerializer(serializers.Serializer):
-    farm_id = serializers.UUIDField()
     delivery_address = serializers.CharField(max_length=500, trim_whitespace=True)
     items = OrderItemCreateSerializer(many=True, allow_empty=False)
 

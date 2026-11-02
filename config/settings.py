@@ -26,6 +26,8 @@ env_file = PROJECT_ROOT / ".env"
 if env_file.exists():
     environ.Env.read_env(str(env_file))
 
+GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
+GEMINI_MODEL = env("GEMINI_MODEL", default="gemini-3.5-flash")
 
 SECRET_KEY = env("SECRET_KEY", default="django-insecure-dev-key-change-in-production")
 DEBUG = env("DEBUG")

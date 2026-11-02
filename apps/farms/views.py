@@ -86,6 +86,7 @@ class FarmHistoryModelViewsets(viewsets.ModelViewSet):
     # permission_classes = [IsAuthenticated]
     serializer_class = FarmHistorySerializers
     permission_classes = [IsAuthenticated]
+    filterset_fields = ["farm", "recorded_at"]
 
     def get_queryset(self):
-        return FarmHistorys.objects.filter(owner=self.request.user)
+        return FarmHistorys.objects.filter(farm__owner=self.request.user).select_related("farm")

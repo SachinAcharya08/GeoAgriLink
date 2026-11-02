@@ -8,6 +8,10 @@ from apps.users.models import User
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """Registration serializer."""
 
+    role = serializers.ChoiceField(
+        choices=[("user", _("User")), ("farmer", _("Farmer")), ("buyer", _("Buyer"))],
+        default="user",
+    )
     password = serializers.CharField(
         write_only=True,
         min_length=8,
@@ -25,6 +29,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             "email",
             "first_name",
             "last_name",
+            "role",
             "password",
             "password_confirm",
         ]

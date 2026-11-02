@@ -61,7 +61,13 @@ class Order(BaseModel):
     ]
 
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders")
-    farm = models.ForeignKey("farms.Farms", on_delete=models.PROTECT, related_name="orders")
+    seller = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="sales_orders",
+        null=True,
+        blank=True,
+    )
     status = models.CharField(max_length=20, choices=STATUS, default="pending", db_index=True)
     delivery_address = models.TextField()
 
@@ -69,7 +75,6 @@ class Order(BaseModel):
         ordering = ["-created_at"]
         indexes = [
             models.Index(fields=["customer", "-created_at"]),
-            models.Index(fields=["farm", "status", "-created_at"]),
         ]
 
     @property
