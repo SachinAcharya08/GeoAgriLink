@@ -134,6 +134,7 @@ dmypy.json
 /media/
 /staticfiles/
 /static/
+/config/media/
 
 # Logs
 /logs/

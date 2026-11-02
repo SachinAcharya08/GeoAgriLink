@@ -39,6 +39,7 @@ class FarmModelViewsets(viewsets.ModelViewSet):
 class FarmHistoryModelViewsets(viewsets.ModelViewSet):
     # permission_classes = [IsAuthenticated]
     serializer_class = FarmHistorySerializers
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return FarmHistorys.objects.filter(owner=self.request.user)

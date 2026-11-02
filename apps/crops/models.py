@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -7,6 +8,13 @@ from apps.core.base_model import BaseModel
 
 class Crops(BaseModel):
     name = models.CharField(max_length=500)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="crops",
+        null=True,
+        blank=True,
+    )
     category = models.CharField(max_length=250)
     image = models.ImageField(upload_to="crops/", blank=True, null=True)
     desc = models.TextField(max_length=1000)

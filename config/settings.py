@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 from pathlib import Path
 
@@ -11,6 +12,7 @@ env = environ.Env(
     DEBUG=(bool,),
     ALLOWED_HOSTS=(str, "localhost,127.0.0.1"),
 )
+FASTAPI_URL = os.getenv("FASTAPI_URL")
 
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent
