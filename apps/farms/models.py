@@ -6,7 +6,7 @@ from apps.core.base_model import BaseModel
 
 class Farms(BaseModel):
     name = models.CharField(max_length=255)
-    boundary = models.JSONField()
+    boundary = models.JSONField(default=list)
     address = models.CharField(max_length=500)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="farms")
     area = models.DecimalField(max_digits=10, decimal_places=2)
@@ -16,11 +16,13 @@ class Farms(BaseModel):
 
     class Meta:
         db_table = "Farms"
+        verbose_name = "Farms"
+        verbose_name_plural = "Farms"
 
 
 class FarmHistorys(BaseModel):
     farm = models.ForeignKey("farms.Farms", on_delete=models.CASCADE, related_name="history")
-    recorded_at = models.DateField()
+    recorded_at = models.DateField()  # Date of the data
     ci_rededge = models.FloatField(null=True, blank=True)
     evi = models.FloatField(null=True, blank=True)
     lswi = models.FloatField(null=True, blank=True)
