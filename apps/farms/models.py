@@ -5,6 +5,7 @@ from apps.core.base_model import BaseModel
 
 
 class Farms(BaseModel):
+    image = models.ImageField(upload_to="farms/", blank=True, null=True)
     name = models.CharField(max_length=255)
     boundary = models.JSONField(default=list)
     address = models.CharField(max_length=500)

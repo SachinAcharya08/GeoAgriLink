@@ -26,6 +26,7 @@ urlpatterns = [
     path("api/v1/", include("apps.crops.urls")),
     path("api/v1/", include("apps.ai_insights.urls")),
     path("api/v1/", include("apps.marketplaces.urls")),
+    # path("api/v1/", include("apps.weather.urls"))
 ]
 
 if settings.DEBUG:
