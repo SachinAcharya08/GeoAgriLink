@@ -5,6 +5,17 @@ from django.db import models
 
 from apps.core.base_model import BaseModel
 
+CROP_CATEGORIES = [
+    ("cereals", "Cereals"),
+    ("vegetables", "Vegetables"),
+    ("fruits", "Fruits"),
+    ("pulses", "Pulses"),
+    ("oilseeds", "Oilseeds"),
+    ("cash_crops", "Cash Crops"),
+    ("spices", "Spices"),
+    ("other", "Other"),
+]
+
 
 class Crops(BaseModel):
     name = models.CharField(max_length=500)
@@ -15,7 +26,7 @@ class Crops(BaseModel):
         null=True,
         blank=True,
     )
-    category = models.CharField(max_length=250)
+    category = models.CharField(max_length=250, choices=CROP_CATEGORIES, default="other")
     image = models.ImageField(upload_to="crops/", blank=True, null=True)
     desc = models.TextField(max_length=1000)
 

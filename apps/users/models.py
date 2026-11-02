@@ -65,7 +65,7 @@ class User(AbstractUser, BaseModel):
     )
 
     last_login_ip = models.GenericIPAddressField(blank=True, null=True, verbose_name=_("Last Login IP"))
-
+    username = None
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name"]
 
