@@ -20,6 +20,7 @@ UNIT = [
 class Product(BaseModel):
     farm = models.ForeignKey("farms.Farms", on_delete=models.PROTECT, related_name="products")
     name = models.CharField(max_length=150)
+    image = models.ImageField(upload_to="products/", blank=True, null=True)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal("0.01"))])
     unit = models.CharField(max_length=20, choices=UNIT, default="kg")
