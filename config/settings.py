@@ -26,13 +26,14 @@ env_file = PROJECT_ROOT / ".env"
 if env_file.exists():
     environ.Env.read_env(str(env_file))
 
+
 SECRET_KEY = env("SECRET_KEY", default="django-insecure-dev-key-change-in-production")
 DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(",")
 
 INSTALLED_APPS = [
-    "jazzmin",
+    # "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -250,8 +251,8 @@ LOGGING = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Template API",
-    "DESCRIPTION": "Template Django REST Framework",
+    "TITLE": "AgroLink API",
+    "DESCRIPTION": "AgroLink Django REST Framework",
     "VERSION": "1.0.0",
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
 }
@@ -371,3 +372,8 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_flat_style": False,
 }
+
+
+SERVICE_ACCOUNT = env("SERVICE_ACCOUNT", default="")
+KEY_FILE = env("KEY_FILE", default="")
+PROJECT_ID = env("PROJECT_ID", default="")

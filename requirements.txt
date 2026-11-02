@@ -1,17 +1,17 @@
 # Core Django & DRF
-Django==5.2
-djangorestframework==3.15.2
-djangorestframework-simplejwt==5.5.0
+Django
+djangorestframework
+djangorestframework-simplejwt
 
 # Database
-PyMySQL==1.1.1
+PyMySQL
 cryptography==44.0.0
 
 # Django Extensions
 django-cors-headers==4.6.0
 django-environ==0.12.0
 django-filter==25.1
-django-jazzmin==3.0.0
+django-jazzmin
 django-extensions==3.2.3
 
 # Static Files & WSGI
