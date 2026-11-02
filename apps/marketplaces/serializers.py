@@ -16,6 +16,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "farm_name",
             "name",
             "description",
+            "image",
             "price",
             "unit",
             "quantity_available",
@@ -25,7 +26,6 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             "id",
-            "farm",
             "farm_name",
             "created_at",
             "updated_at",
@@ -52,6 +52,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             "farm",
             "farm_name",
             "name",
+            "image",
             "description",
             "price",
             "unit",

@@ -33,6 +33,8 @@ class Crops(BaseModel):
     class Meta:
         db_table = "Crops"
         ordering = ["name"]
+        verbose_name = "Crops"
+        verbose_name_plural = "Crops"
 
     def __str__(self):
         return self.name

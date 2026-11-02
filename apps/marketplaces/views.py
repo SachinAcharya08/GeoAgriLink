@@ -10,7 +10,6 @@ from django.db.models import (
     Value,
 )
 from django.db.models.functions import Coalesce
-from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import (
@@ -20,7 +19,7 @@ from rest_framework.permissions import (
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.farms.models import Farms
+# from apps.farms.models import Farms
 from apps.marketplaces.models import Order, Product
 from apps.marketplaces.serializers import (
     OrderCreateSerializer,
@@ -82,12 +81,12 @@ class ProductViewSet(viewsets.ModelViewSet):
         return ProductSerializer
 
     def perform_create(self, serializer):
-        farm = get_object_or_404(
-            Farms,
-            owner=self.request.user,
-        )
+        # farm = get_object_or_404(
+        #     Farms,
+        #     owner=self.request.user,
+        # )
 
-        serializer.save(farm=farm)
+        serializer.save()
 
 
 class OrderViewSet(viewsets.ReadOnlyModelViewSet):
