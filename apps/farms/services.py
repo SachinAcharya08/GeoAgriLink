@@ -1,6 +1,15 @@
+import json
+from datetime import date
+
+import requests
+from django.conf import settings
+
 from apps.farms.models import FarmHistorys, Farms
 
 from .gee_services import fetch_gee_data
+
+# from rest_framework import status
+# from rest_framework.response import Response
 
 
 class FarmService:
@@ -28,23 +37,59 @@ class FarmService:
             result = fetch_gee_data(
                 Farms.objects.get(id=farm_id).boundary, target_date=recorded_at, days_back=days_back
             )
-            farm_history = FarmHistorys.objects.create(
-                farm_id=farm_id,
-                # recorded_at=recorded_at,
-                **result
-            )
+            farm_history = FarmHistorys.objects.create(farm_id=farm_id, recorded_at=recorded_at, **result)
             return farm_history
 
     @staticmethod
-    def analyze_farm_history(farm_history):
-        analysis_result = {
-            "ci_rededge": farm_history.ci_rededge,
-            "evi": farm_history.evi,
-            "lswi": farm_history.lswi,
-            "ndre": farm_history.ndre,
+    def analyze_farm_gee(farm):
+
+        farm_history = FarmService.fetch_farm_history_indexes(
+            farm.id,
+            date.today(),
+            days_back=30,
+        )
+
+        if farm_history.ai_response:
+            try:
+                return json.loads(farm_history.ai_response)
+            except json.JSONDecodeError as exc:
+                raise RuntimeError("Stored AI service response is invalid JSON.") from exc
+
+        payload = {
             "ndvi": farm_history.ndvi,
+            "evi": farm_history.evi,
+            "ndre": farm_history.ndre,
+            "ci_rededge": farm_history.ci_rededge,
             "ndwi": farm_history.ndwi,
+            "lswi": farm_history.lswi,
             "lst": farm_history.lst,
             "source": farm_history.source,
         }
-        return analysis_result
+
+        url = f"{settings.FASTAPI_URL.rstrip('/')}/vegetation"
+
+        try:
+            api_response = requests.post(
+                url,
+                json=payload,
+                timeout=30,
+            )
+
+            api_response.raise_for_status()
+
+            result = api_response.json()
+            farm_history.ai_response = json.dumps(result)
+            farm_history.save(update_fields=["ai_response"])
+            return result
+
+        except requests.Timeout:
+            raise RuntimeError("AI service request timed out.")
+
+        except requests.HTTPError as exc:
+            raise RuntimeError(f"AI service returned HTTP {exc.response.status_code}.")
+
+        except requests.RequestException:
+            raise RuntimeError("Unable to connect to AI service.")
+
+        except ValueError:
+            raise RuntimeError("AI service returned invalid JSON.")
