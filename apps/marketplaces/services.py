@@ -7,7 +7,7 @@ from apps.marketplaces.models import Order, OrderItem, Product
 
 
 @transaction.atomic
-def create_order(customer, farm_id, delivery_address, items):
+def create_order(customer, delivery_address, items):
 
     if not items:
         raise ValidationError("Order must contain at least one product.")
@@ -31,18 +31,21 @@ def create_order(customer, farm_id, delivery_address, items):
         product_quantities[product_id] = quantity
 
     # Lock products to prevent concurrent orders from overselling stock.
-    products = list(Product.objects.select_for_update().filter(id__in=product_quantities.keys()).order_by("id"))
+    products = list(
+        Product.objects.select_for_update()
+        .select_related("farm__owner")
+        .filter(id__in=product_quantities.keys())
+        .order_by("id")
+    )
 
     if len(products) != len(product_quantities):
         raise ValidationError("One or more products do not exist.")
 
     order_items = []
+    seller_ids = set()
 
     for product in products:
         quantity = product_quantities[product.id]
-
-        if product.farm_id != farm_id:
-            raise ValidationError(f"{product.name} does not belong to the selected farm.")
 
         if not product.is_available:
             raise ValidationError(f"{product.name} is currently unavailable.")
@@ -50,35 +53,30 @@ def create_order(customer, farm_id, delivery_address, items):
         if product.quantity_available < quantity:
             raise ValidationError(f"Insufficient stock for {product.name}.")
 
-        order_items.append(
-            {
-                "product": product,
-                "product_name": product.name,
-                "unit": product.unit,
-                "quantity": quantity,
-                "unit_price": product.price,
-            }
-        )
+        seller_ids.add(product.farm.owner_id)
+        order_items.append((product, quantity))
+
+    if len(seller_ids) != 1:
+        raise ValidationError("All products in an order must belong to the same seller.")
 
     order = Order.objects.create(
         customer=customer,
-        farm_id=farm_id,
+        seller_id=seller_ids.pop(),
         delivery_address=delivery_address,
         status="pending",
     )
 
-    for item in order_items:
+    for product, quantity in order_items:
         OrderItem.objects.create(
             order=order,
-            product=item["product"],
-            product_name=item["product_name"],
-            unit=item["unit"],
-            quantity=item["quantity"],
-            unit_price=item["unit_price"],
+            product=product,
+            product_name=product.name,
+            unit=product.unit,
+            quantity=quantity,
+            unit_price=product.price,
         )
 
-        product = item["product"]
-        product.quantity_available -= item["quantity"]
+        product.quantity_available -= quantity
         product.save(update_fields=["quantity_available"])
 
     return order

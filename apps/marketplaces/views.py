@@ -10,14 +10,15 @@ from django.db.models import (
     Value,
 )
 from django.db.models.functions import Coalesce
+from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import (
     BasePermission,
     IsAuthenticated,
 )
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 # from apps.farms.models import Farms
 from apps.marketplaces.models import Order, Product
@@ -98,16 +99,16 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
+    def _orders_queryset(self, **filters):
         return (
-            Order.objects.filter(customer=self.request.user)
+            Order.objects.filter(**filters)
             .select_related(
                 "customer",
-                "farm",
+                "seller",
             )
             .prefetch_related("items")
             .annotate(
-                total_amount=Coalesce(
+                total_amount_calculated=Coalesce(
                     Sum(
                         ExpressionWrapper(
                             F("items__quantity") * F("items__unit_price"),
@@ -127,11 +128,34 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
             .order_by("-created_at")
         )
 
+    def get_queryset(self):
+        return self._orders_queryset(seller=self.request.user)
 
-class OrderCreateView(APIView):
-    permission_classes = [IsAuthenticated]
+    @extend_schema(
+        responses=OrderSerializer(many=True),
+        description="List all orders received by the authenticated farmer.",
+    )
+    @action(detail=False, methods=["get"], url_path="farmer-orders")
+    def farmer_orders(self, request):
+        serializer = self.get_serializer(self._orders_queryset(seller=request.user), many=True)
+        return Response(serializer.data)
 
-    def post(self, request):
+    @extend_schema(
+        responses=OrderSerializer(many=True),
+        description="List orders placed by the authenticated buyer.",
+    )
+    @action(detail=False, methods=["get"], url_path="my-orders")
+    def my_orders(self, request):
+        serializer = self.get_serializer(self._orders_queryset(customer=request.user), many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        request=OrderCreateSerializer,
+        responses={status.HTTP_201_CREATED: OrderSerializer},
+        description="Create an order with nested order items.",
+    )
+    @action(detail=False, methods=["post"], url_path="create")
+    def create_order(self, request):
         serializer = OrderCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -145,7 +169,7 @@ class OrderCreateView(APIView):
                 raise ValidationError(exc.message_dict)
             raise ValidationError(exc.messages)
 
-        order = Order.objects.select_related("customer", "farm").prefetch_related("items").get(pk=order.pk)
+        order = Order.objects.select_related("customer", "seller").prefetch_related("items").get(pk=order.pk)
 
         response_serializer = OrderSerializer(order)
 
