@@ -3,6 +3,7 @@ from rest_framework import response, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
+from apps.crops.serializers import ProductionHistorySerializers
 from apps.farms.models import FarmHistorys, Farms
 from apps.farms.serializers import FarmHistorySerializers, FarmSerializers
 from apps.farms.services import FarmService
@@ -29,8 +30,8 @@ class FarmModelViewsets(viewsets.ModelViewSet):
 
         try:
             farm_history = FarmService.fetch_farm_history_indexes(farm_id, recorded_at, days_back=30)
-            serializer = self.get_serializer(farm_history)
-            return response.Response(serializer.data)
+            serializer = FarmHistorySerializers(farm_history)
+            return response.Response(serializer.data, status=200)
         except Farms.DoesNotExist:
             return response.Response({"error": "Farm not found."}, status=404)
 
@@ -63,6 +64,20 @@ class FarmModelViewsets(viewsets.ModelViewSet):
             return response.Response(
                 {"error": str(exc)},
                 status=502,
+            )
+
+    @action(detail=True, methods=["get"], url_path="production-history")
+    def farm_production_history(self, request, pk=None):
+        try:
+            farm = self.get_queryset().get(pk=pk)
+            production_history = farm.production_history.all()
+            serializer = ProductionHistorySerializers(production_history, many=True)
+            return response.Response(serializer.data)
+
+        except Farms.DoesNotExist:
+            return response.Response(
+                {"error": "Farm not found."},
+                status=404,
             )
 
 

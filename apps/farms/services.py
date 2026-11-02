@@ -1,3 +1,4 @@
+import json
 from datetime import date
 
 import requests
@@ -48,6 +49,12 @@ class FarmService:
             days_back=30,
         )
 
+        if farm_history.ai_response:
+            try:
+                return json.loads(farm_history.ai_response)
+            except json.JSONDecodeError as exc:
+                raise RuntimeError("Stored AI service response is invalid JSON.") from exc
+
         payload = {
             "ndvi": farm_history.ndvi,
             "evi": farm_history.evi,
@@ -70,7 +77,10 @@ class FarmService:
 
             api_response.raise_for_status()
 
-            return api_response.json()
+            result = api_response.json()
+            farm_history.ai_response = json.dumps(result)
+            farm_history.save(update_fields=["ai_response"])
+            return result
 
         except requests.Timeout:
             raise RuntimeError("AI service request timed out.")
