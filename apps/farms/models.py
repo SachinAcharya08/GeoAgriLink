@@ -31,6 +31,7 @@ class FarmHistorys(BaseModel):
     ndwi = models.FloatField(null=True, blank=True)
     lst = models.FloatField(null=True, blank=True)
     source = models.CharField(max_length=100, default="GEE")
+    # ai_response=  models.TextField
 
     def __str__(self):
         return f"{self.farm.name} - {self.recorded_at}"

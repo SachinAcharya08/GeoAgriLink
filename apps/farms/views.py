@@ -34,6 +34,37 @@ class FarmModelViewsets(viewsets.ModelViewSet):
         except Farms.DoesNotExist:
             return response.Response({"error": "Farm not found."}, status=404)
 
+    @action(detail=True, methods=["get"], url_path="analyze_farm_gee")
+    def analyze_farm_gee(self, request, pk=None):
+
+        try:
+            farm = self.get_queryset().get(pk=pk)
+
+            result = FarmService.analyze_farm_gee(farm)
+
+            return response.Response(
+                result,
+                status=200,
+            )
+
+        except Farms.DoesNotExist:
+            return response.Response(
+                {"error": "Farm not found."},
+                status=404,
+            )
+
+        except FarmHistorys.DoesNotExist:
+            return response.Response(
+                {"error": "Farm history not found."},
+                status=404,
+            )
+
+        except RuntimeError as exc:
+            return response.Response(
+                {"error": str(exc)},
+                status=502,
+            )
+
 
 @extend_schema(tags=["Farm-History"])
 class FarmHistoryModelViewsets(viewsets.ModelViewSet):
@@ -43,12 +74,3 @@ class FarmHistoryModelViewsets(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return FarmHistorys.objects.filter(owner=self.request.user)
-
-    @action(detail=True, methods=["get"], url_path="analyze_farm_history")
-    def analyze_farm_history(self, request, pk=None):
-        try:
-            farm_history = FarmHistorys.objects.get(pk=pk)
-            analysis_result = FarmService.analyze_farm_history(farm_history)
-            return response.Response(analysis_result)
-        except FarmHistorys.DoesNotExist:
-            return response.Response({"error": "Farm history not found."}, status=404)

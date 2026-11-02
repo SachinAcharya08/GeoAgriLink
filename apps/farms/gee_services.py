@@ -484,7 +484,7 @@ def fetch_gee_data(
     latest = df.iloc[-1]
 
     result = {
-        "recorded_at": latest["date"].date().isoformat(),
+        # "recorded_at": latest["date"].date().isoformat(),
         "ci_rededge": _safe_float(latest["ci_rededge"]),
         "evi": _safe_float(latest["evi"]),
         "lswi": _safe_float(latest["lswi"]),
