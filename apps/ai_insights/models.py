@@ -16,6 +16,7 @@ class AIInsight(BaseModel):
     production_history = models.ForeignKey(
         "crops.ProductionHistory", on_delete=models.SET_NULL, related_name="ai_insights", null=True, blank=True
     )
+    image = models.ImageField(upload_to="images/", blank=True, null=True)
     insight_type = models.CharField(max_length=30, choices=INSIGHT_TYPES)
     result = models.JSONField()
     model_version = models.CharField(max_length=100)

@@ -134,6 +134,7 @@ dmypy.json
 /media/
 /staticfiles/
 /static/
+/config/media/
 
 # Logs
 /logs/
@@ -145,3 +146,4 @@ dmypy.json
 # OS
 .DS_Store
 Thumbs.db
+

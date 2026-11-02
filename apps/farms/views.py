@@ -17,8 +17,11 @@ class FarmModelViewsets(viewsets.ModelViewSet):
 
 
 class FarmHistoryModelViewsets(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
     serializer_class = FarmHistorySerializers
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return FarmHistorys.objects.filter(owner=self.request.user)
+        if getattr(self, "swagger_fake_view", False):
+            return FarmHistorys.objects.none()
+
+        return FarmHistorys.objects.filter(farm__owner=self.request.user).select_related("farm")
