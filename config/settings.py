@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "apps.crops.apps.CropsConfig",
     "apps.ai_insights.apps.AiInsightsConfig",
     "apps.marketplaces.apps.MarketplacesConfig",
+    "apps.chatbot.apps.ChatbotConfig",
 ]
 
 MIDDLEWARE = [
@@ -377,3 +378,8 @@ JAZZMIN_UI_TWEAKS = {
 SERVICE_ACCOUNT = env("SERVICE_ACCOUNT", default="")
 KEY_FILE = env("KEY_FILE", default="")
 PROJECT_ID = env("PROJECT_ID", default="")
+
+
+# CHATBOT
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")

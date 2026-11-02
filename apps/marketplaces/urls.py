@@ -7,8 +7,10 @@ router = DefaultRouter()
 router.register("products", ProductViewSet, basename="products")
 router.register("orders", OrderViewSet, basename="orders")
 
+
 urlpatterns = [
     path("orders/create/", OrderCreateView.as_view(), name="order-create"),
 ]
+
 
 urlpatterns += router.urls

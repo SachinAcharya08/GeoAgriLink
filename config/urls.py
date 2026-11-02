@@ -26,6 +26,10 @@ urlpatterns = [
     path("api/v1/", include("apps.crops.urls")),
     path("api/v1/", include("apps.ai_insights.urls")),
     path("api/v1/", include("apps.marketplaces.urls")),
+    path(
+        "api/v1/chatbot/",
+        include("apps.chatbot.urls"),
+    ),
 ]
 
 if settings.DEBUG:
