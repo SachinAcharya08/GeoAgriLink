@@ -3,8 +3,8 @@ import logging
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
-from drf_spectacular.utils import extend_schema
-from rest_framework import mixins, status, viewsets
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import MultiPartParser
@@ -17,6 +17,7 @@ from apps.chatbot.serializers import (
     ChatMessageSerializer,
     ChatRequestSerializer,
     ConfirmActionSerializer,
+    TranscriptionPreviewRequestSerializer,
     VoiceChatRequestSerializer,
 )
 from apps.chatbot.services.gemini import GeminiService
@@ -94,6 +95,26 @@ class ChatConversationViewSet(
             },
             status=status.HTTP_201_CREATED,
         )
+
+    @extend_schema(
+        request=TranscriptionPreviewRequestSerializer,
+        responses=inline_serializer(
+            name="TranscriptionPreviewResponse",
+            fields={"transcript": serializers.CharField()},
+        ),
+    )
+    @action(detail=False, methods=["post"], url_path="transcribe", parser_classes=[MultiPartParser])
+    def transcribe(self, request):
+        """Return the recognized text without creating a message or calling the assistant."""
+        serializer = TranscriptionPreviewRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            transcript = transcribe_audio(serializer.validated_data["audio"])
+        except TranscriptionError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_502_BAD_GATEWAY)
+
+        return Response({"transcript": transcript}, status=status.HTTP_200_OK)
 
     @extend_schema(request=VoiceChatRequestSerializer)
     @action(detail=False, methods=["post"], url_path="voice", parser_classes=[MultiPartParser])

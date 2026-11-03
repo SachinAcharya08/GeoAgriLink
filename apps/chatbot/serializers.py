@@ -33,20 +33,31 @@ class VoiceChatRequestSerializer(ChatRequestSerializer):
     audio = serializers.FileField()
 
     def validate_audio(self, value):
-        allowed_types = {
-            "audio/wav",
-            "audio/x-wav",
-            "audio/mpeg",
-            "audio/mp4",
-            "audio/x-m4a",
-            "audio/ogg",
-            "audio/webm",
-        }
-        if value.content_type not in allowed_types:
-            raise serializers.ValidationError("Unsupported audio type.")
-        if value.size > 10 * 1024 * 1024:
-            raise serializers.ValidationError("Audio file cannot exceed 10 MB.")
-        return value
+        return validate_audio_file(value)
+
+
+class TranscriptionPreviewRequestSerializer(serializers.Serializer):
+    audio = serializers.FileField()
+
+    def validate_audio(self, value):
+        return validate_audio_file(value)
+
+
+def validate_audio_file(value):
+    allowed_types = {
+        "audio/wav",
+        "audio/x-wav",
+        "audio/mpeg",
+        "audio/mp4",
+        "audio/x-m4a",
+        "audio/ogg",
+        "audio/webm",
+    }
+    if value.content_type not in allowed_types:
+        raise serializers.ValidationError("Unsupported audio type.")
+    if value.size > 10 * 1024 * 1024:
+        raise serializers.ValidationError("Audio file cannot exceed 10 MB.")
+    return value
 
 
 class ConfirmActionSerializer(serializers.Serializer):

@@ -215,8 +215,10 @@ TOOLS = {
         "fn": prepare_post_product,
         "declaration": _decl(
             "post_product",
-            "Prepare a marketplace listing for the farmer's produce. Does NOT save it; "
-            "the farmer must tap Confirm. Call once name, price and quantity are known.",
+            "Prepare a marketplace listing for the farmer's produce. Use this tool "
+            "whenever the user says list, listing, post, sell, put up for sale, or "
+            "create a product. Does NOT save it; the farmer must tap Confirm. "
+            "Call once name, price and quantity are known.",
             {
                 "name": _str("Product name"),
                 "price": _num("Price per unit in Rs"),

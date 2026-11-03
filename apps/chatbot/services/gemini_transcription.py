@@ -33,6 +33,11 @@ def transcribe_audio(audio_file):
         )
         transcript = response.text
     except genai.errors.APIError as exc:
+        message = str(exc)
+        if "billing" in message.lower() or "free tier" in message.lower():
+            raise TranscriptionError(
+                "Gemini API access requires billing for this project. Enable billing or use an API key from a billed project."
+            ) from exc
         raise TranscriptionError("Gemini audio transcription failed.") from exc
     except (AttributeError, TypeError, ValueError) as exc:
         raise TranscriptionError("Gemini returned an invalid transcript.") from exc
