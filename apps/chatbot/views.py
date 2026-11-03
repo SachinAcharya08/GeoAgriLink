@@ -1,11 +1,13 @@
 import logging
 
+from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -15,8 +17,13 @@ from apps.chatbot.serializers import (
     ChatMessageSerializer,
     ChatRequestSerializer,
     ConfirmActionSerializer,
+    VoiceChatRequestSerializer,
 )
 from apps.chatbot.services.gemini import GeminiService
+from apps.chatbot.services.gemini_transcription import (
+    TranscriptionError,
+    transcribe_audio,
+)
 from apps.chatbot.tools.writes import EXECUTORS
 
 logger = logging.getLogger(__name__)
@@ -84,6 +91,51 @@ class ChatConversationViewSet(
                 "conversation_id": conversation.id,
                 "message": ChatMessageSerializer(assistant_msg).data,
                 "pending_action": ({"id": str(pending.id), "summary": pending.summary} if pending else None),
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @extend_schema(request=VoiceChatRequestSerializer)
+    @action(detail=False, methods=["post"], url_path="voice", parser_classes=[MultiPartParser])
+    def voice(self, request):
+        serializer = VoiceChatRequestSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            text = transcribe_audio(serializer.validated_data["audio"])
+            conversation = serializer.validated_data.get("conversation")
+            history = list(conversation.messages.all()) if conversation else []
+            reply, pending_id = GeminiService().generate_response(history, text, request.user)
+        except TranscriptionError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_502_BAD_GATEWAY)
+        except Exception:
+            logger.exception("Voice chat processing failed.")
+            return Response(
+                {"detail": "The assistant is unavailable. Try again."},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        with transaction.atomic():
+            if conversation is None:
+                conversation = ChatConversation.objects.create(user=request.user, title=text[:60])
+            ChatMessage.objects.create(
+                conversation=conversation,
+                role=ChatMessage.Role.USER,
+                content=text,
+                metadata={"source": "voice", "transcription_model": settings.GEMINI_MODEL},
+            )
+            assistant_msg = ChatMessage.objects.create(
+                conversation=conversation,
+                role=ChatMessage.Role.ASSISTANT,
+                content=reply,
+                metadata={"pending_action_id": pending_id} if pending_id else {},
+            )
+
+        return Response(
+            {
+                "conversation_id": conversation.id,
+                "transcript": text,
+                "message": ChatMessageSerializer(assistant_msg).data,
             },
             status=status.HTTP_201_CREATED,
         )
