@@ -1,4 +1,5 @@
 from drf_spectacular.utils import extend_schema
+from google.auth.exceptions import RefreshError
 from rest_framework import response, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -35,6 +36,13 @@ class FarmModelViewsets(viewsets.ModelViewSet):
             return response.Response(serializer.data, status=200)
         except Farms.DoesNotExist:
             return response.Response({"error": "Farm not found."}, status=404)
+        except RefreshError:
+            return response.Response(
+                {"error": "Earth Engine authentication failed. Refresh the service-account key."},
+                status=502,
+            )
+        except FileNotFoundError as exc:
+            return response.Response({"error": str(exc)}, status=502)
 
     @action(detail=True, methods=["get"], url_path="analyze_farm_gee")
     def analyze_farm_gee(self, request, pk=None):
