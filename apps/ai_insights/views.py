@@ -90,6 +90,8 @@ class CropDiseaseDetectionModelViewSet(viewsets.ModelViewSet):
         )
 
         return Response(
-            AIInsightSerializers(insight).data,
+            {
+                **AIInsightSerializers(insight, context={"request": request}).data,
+            },
             status=status.HTTP_201_CREATED,
         )
