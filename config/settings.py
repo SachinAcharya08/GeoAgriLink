@@ -28,6 +28,8 @@ if env_file.exists():
 
 GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
 GEMINI_MODEL = env("GEMINI_MODEL", default="gemini-3.5-flash")
+DEEPL_AUTH_KEY = env("DEEPL_AUTH_KEY", default="")
+DEEPL_TRANSLATE_URL = env("DEEPL_TRANSLATE_URL", default="https://api-free.deepl.com/v2/translate")
 
 SECRET_KEY = env("SECRET_KEY", default="django-insecure-dev-key-change-in-production")
 DEBUG = env("DEBUG")

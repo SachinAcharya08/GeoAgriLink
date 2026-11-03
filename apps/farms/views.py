@@ -3,6 +3,7 @@ from rest_framework import response, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
+from apps.core.translation import TranslationError, translate_payload
 from apps.crops.serializers import ProductionHistorySerializers
 from apps.farms.models import FarmHistorys, Farms
 from apps.farms.serializers import FarmHistorySerializers, FarmSerializers
@@ -42,6 +43,7 @@ class FarmModelViewsets(viewsets.ModelViewSet):
             farm = self.get_queryset().get(pk=pk)
 
             result = FarmService.analyze_farm_gee(farm)
+            result = translate_payload(result, request.query_params.get("language", "en"))
 
             return response.Response(
                 result,
@@ -65,6 +67,8 @@ class FarmModelViewsets(viewsets.ModelViewSet):
                 {"error": str(exc)},
                 status=502,
             )
+        except TranslationError as exc:
+            return response.Response({"error": str(exc)}, status=502)
 
     @action(detail=True, methods=["get"], url_path="production-history")
     def farm_production_history(self, request, pk=None):

@@ -1,14 +1,38 @@
 from rest_framework import serializers
 
 from apps.ai_insights.models import AIInsight
+from apps.core.translation import TranslationError, translate_payload
 from apps.farms.models import Farms
 
 
 class AIInsightSerializers(serializers.ModelSerializer):
+    translated_result = serializers.SerializerMethodField()
+
     class Meta:
         model = AIInsight
-        fields = "__all__"
+        fields = [
+            "id",
+            "farm",
+            "production_history",
+            "image",
+            "insight_type",
+            "result",
+            "translated_result",
+            "model_version",
+            "generated_at",
+            "created_at",
+            "updated_at",
+            "is_active",
+        ]
         read_only_fields = ["id", "updated_at", "created_at", "generated_at", "result", "model_version"]
+
+    def get_translated_result(self, obj):
+        request = self.context.get("request")
+        language = request.query_params.get("language", "en") if request else "en"
+        try:
+            return translate_payload(obj.result, language)
+        except TranslationError as exc:
+            raise serializers.ValidationError({"language": str(exc)}) from exc
 
     def validate(self, attrs):
         farm = attrs.get(
